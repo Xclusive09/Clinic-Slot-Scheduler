@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Staff Login - Clinic Slot Scheduler</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+  <script defer src="staff-login.js"></script>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <style>
+    body {
+      background: linear-gradient(120deg, #2563eb 0%, #60a5fa 100%);
+    }
+    .login-card {
+      box-shadow: 0 8px 32px 0 rgba(37,99,235,0.15);
+    }
+  </style>
+</head>
+<body class="min-h-screen flex items-center justify-center px-4">
+  <main class="login-card bg-white rounded-2xl p-8 w-full max-w-md flex flex-col items-center">
+    <div class="flex items-center mb-6">
+      <span class="material-icons text-blue-700 text-4xl mr-2">local_hospital</span>
+      <h1 id="login-title" class="text-3xl font-extrabold text-blue-700 tracking-wide">Staff Login</h1>
+    </div>
+    <form id="loginForm" class="space-y-5 w-full" aria-describedby="login-instruction">
+      <p id="login-instruction" class="text-sm text-gray-600 text-center mb-2">
+        Enter your credentials to access the staff dashboard.
+      </p>
+      <div>
+        <label for="username" class="block text-sm font-medium text-gray-700">Username</label>
+        <input type="text" id="username" name="username" required
+               class="mt-1 block w-full px-4 py-2 border border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-blue-400" />
+      </div>
+      <div>
+        <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
+        <div class="relative">
+          <input type="password" id="password" name="password" required
+                 class="mt-1 block w-full px-4 py-2 border border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-blue-400 pr-10" />
+          <button type="button" id="togglePassword" tabindex="-1"
+            class="absolute inset-y-0 right-0 flex items-center px-3 text-gray-400 hover:text-blue-600 focus:outline-none"
+            aria-label="Show or hide password">
+            <span class="material-icons" id="eyeIcon">visibility_off</span>
+          </button>
+        </div>
+      </div>
+      <div id="errorMsg" class="text-sm text-red-600 text-center hidden" role="alert" aria-live="polite"></div>
+      <button type="submit"
+              class="w-full bg-blue-700 text-white py-2 px-4 rounded-lg font-semibold hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-400 transition">
+        Login
+      </button>
+    </form>
+    <!-- Spinner -->
+    <div id="spinner" class="fixed inset-0 bg-white bg-opacity-60 flex items-center justify-center hidden z-40">
+      <div class="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+    </div>
+    <div class="mt-6 text-xs text-gray-400 text-center">
+      &copy; 2025 Clinic Slot Scheduler. All rights reserved.
+    </div>
+  </main>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const passwordInput = document.getElementById('password');
+      const togglePassword = document.getElementById('togglePassword');
+      const eyeIcon = document.getElementById('eyeIcon');
+      togglePassword.addEventListener('click', function () {
+        const type = passwordInput.type === 'password' ? 'text' : 'password';
+        passwordInput.type = type;
+        eyeIcon.textContent = type === 'password' ? 'visibility_off' : 'visibility';
+      });
+    });
+  </script>
+</body>
+</html>
