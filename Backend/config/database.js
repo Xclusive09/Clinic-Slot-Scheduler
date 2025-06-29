@@ -26,13 +26,6 @@ dialectOptions: {
   }
 );
 
-console.log({
-  DB_NAME: process.env.DB_NAME,
-  DB_USERNAME: process.env.DB_USERNAME,
-  DB_HOST: process.env.DB_HOST,
-  DB_PORT: process.env.DB_PORT,
-  DB_SSL: process.env.DB_SSL
-});
 // Test the connection
 async function testConnection() {
   try {
@@ -40,7 +33,7 @@ async function testConnection() {
     console.log('Database connection established successfully.');
   } catch (error) {
     console.error('Unable to connect to the database:', error);
-    process.exit(1); // Exit with failure
+    process.exit(1);
   }
 }
 
