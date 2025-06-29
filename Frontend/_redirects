@@ -1,3 +1,3 @@
-/*  /student-portal/index.html  200
+/*  /staff-dashboard/index.html  200
 
-/staff/*  /staff-dashboard/:splat  200
+/student/*  /student-portal/:splat  200
