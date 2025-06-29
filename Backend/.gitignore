@@ -1,0 +1,52 @@
+# Node modules
+node_modules/
+
+# Environment variables
+.env
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+logs/
+*.log
+
+# Database
+*.sqlite
+*.sqlite3
+*.db
+*.db-journal
+*.pid
+*.seed
+*.dump
+
+# Coverage
+coverage/
+.nyc_output/
+
+# Build output
+dist/
+build/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# VSCode
+.vscode/
+
+# Test output
+*.test.js.snap
+
+# Misc
+*.swp
+*.swo
+
+# Ignore generated CSV exports
+*.csv
+
+# Ignore IDE/project files
+.idea/
+*.iml
+*.sublime-workspace
+*.sublime-project
