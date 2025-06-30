@@ -1,39 +1,74 @@
 import { Staff } from '../models/staff.js';
-import jwt from 'jsonwebtoken';  // Default import for CommonJS module
+import jwt from 'jsonwebtoken';
 import { validationResult } from 'express-validator';
+import bcrypt from 'bcrypt';
 
 const staffController = {
 
   login: async (req, res, next) => {
     try {
-      // Validate input
+      // 1. Input validation
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
+        console.log('Validation errors:', errors.array());
         return res.status(400).json({ errors: errors.array() });
       }
 
       const { username, password } = req.body;
+      console.log('Login attempt for:', username);
 
-      // Find staff by username
-      const staff = await Staff.findOne({ where: { username } });
+      // 2. Find staff member
+      const staff = await Staff.findOne({ 
+        where: { username },
+        raw: true // Get plain object for debugging
+      });
+      
       if (!staff) {
+        console.log('Staff not found in database');
         return res.status(401).json({ error: 'Invalid credentials' });
       }
 
-      // Check password
-      const isValidPassword = await staff.validPassword(password);
+      console.log('Found staff record:', {
+        id: staff.id,
+        username: staff.username,
+        role: staff.role,
+        password_hash: staff.password_hash
+      });
+
+      // 3. Password validation
+      console.log('Comparing password with hash:', staff.password_hash);
+      
+      // Option 1: If using model method
+      // const isValidPassword = await Staff.validPassword(password, staff.password_hash);
+      
+      // Option 2: Direct bcrypt comparison
+      const isValidPassword = await bcrypt.compare(password, staff.password_hash);
+      console.log('Password comparison result:', isValidPassword);
+
       if (!isValidPassword) {
+        console.log('Password validation failed');
+        console.log('Input password:', password);
+        console.log('Generated hash for input:', await bcrypt.hash(password, 10));
         return res.status(401).json({ error: 'Invalid credentials' });
       }
 
-      // Generate JWT token
-      const token = jwt.sign(  // Using jwt.sign instead of destructured sign
-        { id: staff.id, username: staff.username, role: staff.role },
+      // 4. Token generation
+      if (!process.env.JWT_SECRET) {
+        console.error('JWT_SECRET is not set!');
+        return res.status(500).json({ error: 'Server configuration error' });
+      }
+
+      const token = jwt.sign(
+        { 
+          id: staff.id, 
+          username: staff.username, 
+          role: staff.role 
+        },
         process.env.JWT_SECRET,
         { expiresIn: '8h' }
       );
 
-      // Return token and basic staff info
+      console.log('Login successful for:', username);
       res.json({
         token,
         staff: {
@@ -42,24 +77,14 @@ const staffController = {
           role: staff.role
         }
       });
+
     } catch (error) {
+      console.error('Login error:', error);
       next(error);
     }
   },
 
-  logout: (req, res) => {
-    res.json({ message: 'Logout successful' });
-  },
-
-  getCurrentStaff: (req, res) => {
-    res.json({
-      id: req.user.id,
-      username: req.user.username,
-      role: req.user.role
-    });
-  }
-  
+  // ... rest of your controller methods
 };
 
-
-export  {staffController};
+export { staffController };
