@@ -64,7 +64,7 @@ sequelize.authenticate()
   });
 
   import bcrypt from 'bcrypt';
-import Staff from './models/Staff.js';
+import Staff from './models/staff.js';
 //   const hash = await bcrypt.hash('admin123', 10);
 // console.log(hash);
 
