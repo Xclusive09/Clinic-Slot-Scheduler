@@ -5,17 +5,21 @@ dotenv.config();
 
 const seedStaff = async () => {
   try {
+    const password = 'admin123'; // Use the same password you'll test with
+    const hash = await bcrypt.hash(password, 10);
+    
+    console.log('Seeding with password:', password);
+    console.log('Generated hash:', hash);
+    
     await Staff.create({
-      username: 'teststaff01',
-      password_hash: await bcrypt.hash('password123', 10),
+      username: 'admin',
+      password_hash: hash,
       role: 'admin'
     });
     
     console.log('Staff user created successfully!');
-    process.exit(0);
   } catch (error) {
     console.error('Error seeding staff:', error);
-    process.exit(1);
   }
 };
 

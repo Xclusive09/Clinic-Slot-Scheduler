@@ -42,7 +42,6 @@ app.use('/api/schedule', scheduleRoutes);
 
 
 // Database connection and server start
-// Database connection and server start
 import { sequelize } from './config/database.js';
 const PORT = process.env.PORT || 3000;
 const exportRouter = Router();
@@ -63,5 +62,4 @@ sequelize.authenticate()
   .catch(err => {
     console.error('Unable to connect to the database:', err);
   });
-
 export default app;
