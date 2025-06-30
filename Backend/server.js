@@ -63,7 +63,7 @@ sequelize.authenticate()
     console.error('Unable to connect to the database:', err);
   });
 
-//   import bcrypt from 'bcrypt';
+  import bcrypt from 'bcrypt';
 //   const hash = await bcrypt.hash('admin123', 10);
 // console.log(hash);
 
