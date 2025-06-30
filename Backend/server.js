@@ -62,4 +62,29 @@ sequelize.authenticate()
   .catch(err => {
     console.error('Unable to connect to the database:', err);
   });
+
+//   import bcrypt from 'bcrypt';
+//   const hash = await bcrypt.hash('admin123', 10);
+// console.log(hash);
+
+// Add to your server code temporarily
+app.post('/api/admin/reset-password', async (req, res) => {
+  try {
+    const { username, newPassword } = req.body;
+    const hash = await bcrypt.hash(newPassword, 10);
+    
+    await Staff.update(
+      { password_hash: hash },
+      { where: { username } }
+    );
+    
+    res.json({ 
+      message: 'Password updated',
+      username,
+      newHash: hash
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
 export default app;
