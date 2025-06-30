@@ -13,40 +13,6 @@ document.addEventListener('DOMContentLoaded', () => {
   let currentPage = 1;
   const pageSize = 20;
 
-  // Use localStorage to sync slot data between pages
-  let today = new Date();
-  function addDays(date, days) {
-    const d = new Date(date);
-    d.setDate(d.getDate() + days);
-    return d;
-  }
-  // Generate 30 students, mixing yesterday, today, and tomorrow for slot dates
-  let mockSlots = JSON.parse(localStorage.getItem('clinicSlots')) || (() => {
-    const names = [
-      "Alice Johnson", "Bob Smith", "Carla Nwosu", "David Lee", "Eve Adams", "Frank Obi", "Grace Kim", "Henry Ford",
-      "Ivy Okafor", "Jack Ma", "Kemi Bello", "Liam Ojo", "Mia Zhang", "Noah Musa", "Olivia James", "Paul Okeke",
-      "Queen Eze", "Ryan Yusuf", "Sophia Bello", "Tomiwa Ade", "Uche Obi", "Victoria Danjuma", "William Chukwu",
-      "Xavier Bello", "Yemi Lawal", "Zara Musa", "Abdul Bello", "Bola Okon", "Chidi Nwafor", "Doris Udo"
-    ];
-    const slots = [];
-    for (let i = 0; i < 30; i++) {
-      let dayOffset = i % 3 === 0 ? -1 : (i % 3 === 1 ? 0 : 1); // -1: yesterday, 0: today, 1: tomorrow
-      let slotDate = addDays(today, dayOffset);
-      slots.push({
-        id: `slot${i + 1}`,
-        studentId: `FUD/CSC/23/${(i + 1).toString().padStart(3, '0')}`,
-        name: names[i % names.length],
-        slot: slotDate.toISOString(),
-        status: i % 7 === 0 ? "Completed" : (i % 5 === 0 ? "Cancelled" : "Pending")
-      });
-    }
-    return slots;
-  })();
-
-  function saveSlotsToStorage() {
-    localStorage.setItem('clinicSlots', JSON.stringify(mockSlots));
-  }
-
   function paginate(data, page, size) {
     const start = (page - 1) * size;
     return data.slice(start, start + size);
@@ -57,10 +23,10 @@ document.addEventListener('DOMContentLoaded', () => {
     data.forEach(item => {
       const row = document.createElement('tr');
       row.innerHTML = `
-        <td class="px-4 py-2 border">${item.studentId}</td>
-        <td class="px-4 py-2 border">${item.name}</td>
-        <td class="px-4 py-2 border">${new Date(item.slot).toLocaleString()}</td>
-        <td class="px-4 py-2 border">${item.status}</td>
+        <td class="px-4 py-2 border">${item.studentId || ''}</td>
+        <td class="px-4 py-2 border">${item.name || ''}</td>
+        <td class="px-4 py-2 border">${item.slot ? new Date(item.slot).toLocaleString() : ''}</td>
+        <td class="px-4 py-2 border">${item.status || ''}</td>
         <td class="px-4 py-2 border">
           <div class="flex gap-2 flex-wrap">
             <button data-id="${item.id}" data-action="completed" class="markBtn bg-green-600 text-white px-2 py-1 rounded text-xs hover:bg-green-700">Mark Completed</button>
@@ -85,38 +51,62 @@ document.addEventListener('DOMContentLoaded', () => {
     updatePagination();
   }
 
-  // Show all slots if no filter date is selected
   function filterByDate(dateStr) {
     if (!dateStr) {
       filteredSlots = allSlots;
     } else {
       filteredSlots = allSlots.filter(item => {
-        const itemDate = new Date(item.slot).toISOString().slice(0, 10);
+        const itemDate = item.slot ? new Date(item.slot).toISOString().slice(0, 10) : '';
         return itemDate === dateStr;
       });
     }
     goToPage(1);
   }
 
-  function fetchSlots() {
+  async function fetchSlots() {
     showSpinner();
-    setTimeout(() => {
-      hideSpinner();
-      // Always reload from storage in case another tab/page updated it
-      mockSlots = JSON.parse(localStorage.getItem('clinicSlots')) || mockSlots;
-      allSlots = mockSlots;
+    errorMsg.textContent = '';
+    try {
+      // Generate slots before fetching (optional, depends on your workflow)
+      await fetch('https://clinic-slot-scheduler.onrender.com/api/slots/generate', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${jwt}` }
+      });
+      // Fetch all slots
+      const res = await fetch('https://clinic-slot-scheduler.onrender.com/api/slots', {
+        headers: { Authorization: `Bearer ${jwt}` }
+      });
+      if (!res.ok) throw new Error('Failed to fetch slots');
+      allSlots = await res.json();
       filterByDate(filterDateInput.value);
-    }, 800);
+    } catch (err) {
+      errorMsg.textContent = 'Error fetching slots: ' + err.message;
+      allSlots = [];
+      filteredSlots = [];
+      renderSlots([]);
+      updatePagination();
+    }
+    hideSpinner();
   }
 
-  function updateSlot(id, status) {
-    allSlots = allSlots.map(slot =>
-      slot.id === id ? { ...slot, status } : slot
-    );
-    mockSlots = allSlots;
-    saveSlotsToStorage();
-    filterByDate(filterDateInput.value);
-    showToast(`Marked as ${status}`);
+  async function updateSlot(id, status) {
+    showSpinner();
+    try {
+      const res = await fetch(`https://clinic-slot-scheduler.onrender.com/api/slots/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${jwt}`
+        },
+        body: JSON.stringify({ status })
+      });
+      if (!res.ok) throw new Error('Failed to update slot');
+      showToast(`Marked as ${status}`);
+      await fetchSlots();
+    } catch (err) {
+      showToast('Error updating slot', 'red');
+    }
+    hideSpinner();
   }
 
   fetchBtn.addEventListener('click', fetchSlots);

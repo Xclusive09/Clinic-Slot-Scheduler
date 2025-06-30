@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   let data;
 
   try {
-    const response = await fetch('/api/student-slot');
+    const response = await fetch('https://clinic-slot-scheduler.onrender.com/api/student-slot');
     if (!response.ok) throw new Error('Unable to retrieve slot.');
     data = await response.json();
     if (!data || !data.slot) throw new Error('No slot assigned');

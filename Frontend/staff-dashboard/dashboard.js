@@ -21,8 +21,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const pageSize = 5;
   let chartInstance = null;
 
-  function getSlotsFromStorage() {
-    return JSON.parse(localStorage.getItem('clinicSlots')) || [];
+  function getJwt() {
+    return localStorage.getItem('jwt');
   }
 
   function paginate(data, page, size) {
@@ -78,13 +78,26 @@ document.addEventListener('DOMContentLoaded', () => {
     drawChart(filteredData);
   }
 
-  function fetchSchedule() {
+  async function fetchSchedule() {
     showSpinner();
-    setTimeout(() => {
-      hideSpinner();
-      allData = getSlotsFromStorage();
+    try {
+      const res = await fetch('https://clinic-slot-scheduler.onrender.com/api/schedule', {
+        headers: { Authorization: `Bearer ${getJwt()}` }
+      });
+      if (!res.ok) throw new Error('Failed to fetch schedule');
+      let data = await res.json();
+      // Ensure data is always an array
+      if (!Array.isArray(data)) data = [];
+      allData = data;
       filterByDate(filterDateInput.value);
-    }, 500);
+    } catch (err) {
+      errorMsg.textContent = 'Error fetching schedule: ' + err.message;
+      allData = [];
+      filteredData = [];
+      renderSchedule([]);
+      updatePagination();
+    }
+    hideSpinner();
   }
 
   function drawChart(data) {
@@ -122,16 +135,26 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function exportCSV() {
-    const rows = Array.from(scheduleBody.children).map(row => {
-      return Array.from(row.children).map(cell => `"${cell.textContent.trim()}"`).join(',');
-    });
-    const csvContent = "Student ID,Name,Slot Time,Status\n" + rows.join('\n');
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = 'clinic_schedule.csv';
-    link.click();
+    showSpinner();
+    fetch('https://clinic-slot-scheduler.onrender.com/api/schedule/ex', {
+      headers: { Authorization: `Bearer ${getJwt()}` }
+    })
+      .then(res => {
+        if (!res.ok) throw new Error('Failed to export CSV');
+        return res.blob();
+      })
+      .then(blob => {
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = 'clinic_schedule.csv';
+        link.click();
+      })
+      .catch(() => {
+        showToast('Error exporting CSV', 'red');
+      })
+      .finally(() => {
+        hideSpinner();
+      });
   }
 
   fetchBtn.addEventListener('click', fetchSchedule);
@@ -193,3 +216,14 @@ fetch('/api/some-endpoint')
   .finally(() => {
     hideSpinner();
   });
+
+  async function fetchCurrentStaff() {
+  const token = localStorage.getItem('jwt');
+  const response = await fetch('https://clinic-slot-scheduler.onrender.com/api/staff/me', {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  if (response.ok) {
+    const staff = await response.json();
+    // Use staff info as needed
+  }
+}
