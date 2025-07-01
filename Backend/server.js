@@ -65,10 +65,9 @@ sequelize.authenticate()
 
   import bcrypt from 'bcrypt';
 import {Staff} from './models/staff.js';
-//   const hash = await bcrypt.hash('admin123', 10);
-// console.log(hash);
 
-// Add to your server code temporarily
+
+// Temporary endpoint to reset staff password
 app.post('/api/admin/reset-password', async (req, res) => {
   try {
     const { username, newPassword } = req.body;

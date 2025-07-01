@@ -37,3 +37,13 @@ export const generateSlots = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
+// GET /slots - Get all slots
+export const getAllSlots = async (req, res) => {
+  try {
+    const slots = await Slot.findAll();
+    res.json(slots);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};

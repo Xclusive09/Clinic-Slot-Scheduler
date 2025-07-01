@@ -136,7 +136,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function exportCSV() {
     showSpinner();
-    fetch('https://clinic-slot-scheduler.onrender.com/api/schedule/ex', {
+    fetch('https://clinic-slot-scheduler.onrender.com/api/schedule/export', {
       headers: { Authorization: `Bearer ${getJwt()}` }
     })
       .then(res => {
@@ -204,18 +204,18 @@ function hideSpinner() {
 }
 
 showSpinner();
-// Example usage: fetch data and then hide spinner
-fetch('/api/some-endpoint')
-  .then(response => response.json())
-  .then(data => {
-    // handle data if needed
-  })
-  .catch(error => {
-    // handle error if needed
-  })
-  .finally(() => {
-    hideSpinner();
-  });
+// // Example usage: fetch data and then hide spinner
+// fetch('/api/some-endpoint')
+//   .then(response => response.json())
+//   .then(data => {
+//     // handle data if needed
+//   })
+//   .catch(error => {
+//     // handle error if needed
+//   })
+//   .finally(() => {
+//     hideSpinner();
+//   });
 
   async function fetchCurrentStaff() {
   const token = localStorage.getItem('jwt');

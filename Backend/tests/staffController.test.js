@@ -70,4 +70,31 @@ describe('Staff Controller', () => {
       expect(response.statusCode).toBe(401);
     });
   });
+describe('POST /api/staff/logout', () => {
+  it('should return a logout success message', async () => {
+    // Login to get a valid token
+    const loginRes = await request(app)
+      .post('/api/staff/login')
+      .send({
+        username: 'teststaff',
+        password: 'password123'
+      });
+    const token = loginRes.body.token;
+
+    const response = await request(app)
+      .post('/api/staff/logout')
+      .set('Authorization', `Bearer ${token}`);
+
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toHaveProperty('message', 'Logout successful');
+  });
+
+  it('should return a logout success message even without token', async () => {
+    const response = await request(app)
+      .post('/api/staff/logout');
+
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toHaveProperty('message', 'Logout successful');
+  });
+});
 });
