@@ -1,5 +1,6 @@
 import { DataTypes } from 'sequelize';
 import { sequelize } from '../config/database.js';
+import { Slot } from './slot.js';
 
 export const Student = sequelize.define('Student', {
   id: {
@@ -32,3 +33,5 @@ export const Student = sequelize.define('Student', {
   tableName: 'students',
   timestamps: false
 });
+
+Student.hasMany(Slot, { foreignKey: 'student_id', sourceKey: 'student_id' });
