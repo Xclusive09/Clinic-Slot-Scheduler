@@ -78,27 +78,33 @@ document.addEventListener('DOMContentLoaded', () => {
     drawChart(filteredData);
   }
 
-  async function fetchSchedule() {
-    showSpinner();
-    try {
-      const res = await fetch('https://clinic-slot-scheduler.onrender.com/api/schedule', {
-        headers: { Authorization: `Bearer ${getJwt()}` }
-      });
-      if (!res.ok) throw new Error('Failed to fetch schedule');
-      let data = await res.json();
-      // Ensure data is always an array
-      if (!Array.isArray(data)) data = [];
-      allData = data;
-      filterByDate(filterDateInput.value);
-    } catch (err) {
-      errorMsg.textContent = 'Error fetching schedule: ' + err.message;
-      allData = [];
-      filteredData = [];
-      renderSchedule([]);
-      updatePagination();
-    }
-    hideSpinner();
+async function fetchSchedule() {
+  showSpinner();
+  try {
+    const res = await fetch('https://clinic-slot-scheduler.onrender.com/api/schedule', {
+      headers: { Authorization: `Bearer ${getJwt()}` }
+    });
+    if (!res.ok) throw new Error('Failed to fetch schedule');
+    let result = await res.json();
+    let data = Array.isArray(result.data) ? result.data : [];
+    // Map backend data to FE format
+    allData = data.map(item => ({
+      studentId: item.Student?.student_id || '',
+      name: item.Student?.name || '',
+      slot: item.slot_date && item.slot_time ? `${item.slot_date}T${item.slot_time}` : '',
+      status: item.status || 'Pending', // You may need to adjust this if status is stored elsewhere
+      id: item.id
+    }));
+    filterByDate(filterDateInput.value);
+  } catch (err) {
+    errorMsg.textContent = 'Error fetching schedule: ' + err.message;
+    allData = [];
+    filteredData = [];
+    renderSchedule([]);
+    updatePagination();
   }
+  hideSpinner();
+}
 
   function drawChart(data) {
     const ctx = document.getElementById('summaryChart').getContext('2d');

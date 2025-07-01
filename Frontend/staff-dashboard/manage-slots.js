@@ -63,51 +63,61 @@ document.addEventListener('DOMContentLoaded', () => {
     goToPage(1);
   }
 
-  async function fetchSlots() {
-    showSpinner();
-    errorMsg.textContent = '';
-    try {
-      // Generate slots before fetching (optional, depends on your workflow)
-      await fetch('https://clinic-slot-scheduler.onrender.com/api/slots/generate', {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${jwt}` }
-      });
-      // Fetch all slots
-      const res = await fetch('https://clinic-slot-scheduler.onrender.com/api/slots', {
-        headers: { Authorization: `Bearer ${jwt}` }
-      });
-      if (!res.ok) throw new Error('Failed to fetch slots');
-      allSlots = await res.json();
-      filterByDate(filterDateInput.value);
-    } catch (err) {
-      errorMsg.textContent = 'Error fetching slots: ' + err.message;
-      allSlots = [];
-      filteredSlots = [];
-      renderSlots([]);
-      updatePagination();
-    }
-    hideSpinner();
-  }
+async function fetchSlots() {
+  showSpinner();
+  errorMsg.textContent = '';
+  try {
+    const res = await fetch('https://clinic-slot-scheduler.onrender.com/api/slots', {
+      headers: { Authorization: `Bearer ${jwt}` }
+    });
+    if (!res.ok) throw new Error('Failed to fetch slots');
+    const slots = await res.json();
 
-  async function updateSlot(id, status) {
-    showSpinner();
-    try {
-      const res = await fetch(`https://clinic-slot-scheduler.onrender.com/api/slots/${id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${jwt}`
-        },
-        body: JSON.stringify({ status })
-      });
-      if (!res.ok) throw new Error('Failed to update slot');
-      showToast(`Marked as ${status}`);
-      await fetchSlots();
-    } catch (err) {
-      showToast('Error updating slot', 'red');
-    }
-    hideSpinner();
+    allSlots = slots.map(slot => ({
+      studentId: slot.student_id || '',
+      name: slot.Student ? slot.Student.name : '',
+      slot: slot.slot_date && slot.slot_time ? `${slot.slot_date}T${slot.slot_time}` : '',
+      status: slot.is_booked ? 'Completed' : 'Pending',
+      id: slot.id
+    }));
+
+    filterByDate(filterDateInput.value);
+  } catch (err) {
+    errorMsg.textContent = 'Error fetching slots: ' + err.message;
+    allSlots = [];
+    filteredSlots = [];
+    renderSlots([]);
+    updatePagination();
   }
+  hideSpinner();
+}
+
+async function updateSlot(id, status) {
+  showSpinner();
+  try {
+    let body = {};
+    if (status === 'Completed') {
+      body.is_booked = true;
+    } else if (status === 'Cancelled') {
+      body.is_booked = false;
+      body.student_id = null;
+    }
+    const res = await fetch(`https://clinic-slot-scheduler.onrender.com/api/slots/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${jwt}`
+      },
+      body: JSON.stringify(body)
+    });
+    if (!res.ok) throw new Error('Failed to update slot');
+    showToast(`Marked as ${status}`);
+    await fetchSlots();
+  } catch (err) {
+    showToast('Error updating slot', 'red');
+  }
+  hideSpinner();
+}
 
   fetchBtn.addEventListener('click', fetchSlots);
 
@@ -164,14 +174,3 @@ function hideSpinner() {
 }
 
 showSpinner();
-fetch('/api/some-endpoint')
-  .then(response => response.json())
-  .then(data => {
-    // handle data if needed
-  })
-  .catch(error => {
-    // handle error if needed
-  })
-  .finally(() => {
-    hideSpinner();
-  });

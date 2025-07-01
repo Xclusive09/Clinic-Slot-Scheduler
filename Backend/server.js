@@ -46,8 +46,8 @@ import { sequelize } from './config/database.js';
 const PORT = process.env.PORT || 3000;
 const exportRouter = Router();
 
-exportRouter.get('/export', authenticate, exportToCSV);
-app.use('/api', exportRouter);
+// exportRouter.get('/export', authenticate, exportToCSV);
+// app.use('/api', exportRouter);
 
 sequelize.authenticate()
   .then(() => {

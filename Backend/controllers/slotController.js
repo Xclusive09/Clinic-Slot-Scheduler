@@ -1,4 +1,5 @@
 import { Slot } from '../models/slot.js';
+import { Student } from '../models/student.js';
 
 // PUT /slots/:id - Update slot status
 export const updateSlotStatus = async (req, res) => {
@@ -38,10 +39,20 @@ export const generateSlots = async (req, res) => {
   }
 };
 
-// GET /slots - Get all slots
+
+// GET /slots - Get all slots with student info
 export const getAllSlots = async (req, res) => {
   try {
-    const slots = await Slot.findAll();
+    const slots = await Slot.findAll({
+      include: [
+        {
+          model: Student,
+          attributes: ['student_id', 'name'],
+          required: false,
+          foreignKey: 'student_id',
+        }
+      ]
+    });
     res.json(slots);
   } catch (error) {
     res.status(500).json({ error: error.message });
