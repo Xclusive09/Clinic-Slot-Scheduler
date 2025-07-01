@@ -1,6 +1,5 @@
 import { DataTypes } from 'sequelize';
 import { sequelize } from '../config/database.js';
-import { Student } from './student.js';
 
 export const Slot = sequelize.define('Slot', {
   id: {
@@ -32,6 +31,4 @@ export const Slot = sequelize.define('Slot', {
   tableName: 'slots',
   timestamps: false
 });
-
-Slot.belongsTo(Student, { foreignKey: 'student_id', targetKey: 'student_id' });
 

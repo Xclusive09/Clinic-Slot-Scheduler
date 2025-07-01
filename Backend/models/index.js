@@ -12,4 +12,8 @@ Student.hasMany(Booking, { foreignKey: 'student_id', sourceKey: 'student_id' });
 // Staff.hasMany(Booking, { foreignKey: 'staff_id', sourceKey: 'id' }); // If you have staff_id in Booking
 Slot.hasMany(Booking, { foreignKey: 'slot_id', sourceKey: 'id' });
 
+// Student <-> Slot association
+Slot.belongsTo(Student, { foreignKey: 'student_id', targetKey: 'student_id' });
+Student.hasMany(Slot, { foreignKey: 'student_id', sourceKey: 'student_id' });
+
 export { Booking, Staff, Student, Slot };
