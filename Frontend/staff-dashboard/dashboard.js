@@ -87,14 +87,15 @@ async function fetchSchedule() {
     if (!res.ok) throw new Error('Failed to fetch schedule');
     let result = await res.json();
     let data = Array.isArray(result.data) ? result.data : [];
-    // Map backend data to FE format
     allData = data.map(item => ({
-      studentId: item.Student?.student_id || '',
-      name: item.Student?.name || '',
-      slot: item.slot_date && item.slot_time ? `${item.slot_date}T${item.slot_time}` : '',
-      status: item.status || 'Pending', // You may need to adjust this if status is stored elsewhere
-      id: item.id
-    }));
+  studentId: item.Student?.student_id || '',
+  name: item.Student?.name || '',
+  slot: item.slot_date && item.slot_time ? `${item.slot_date}T${item.slot_time}` : '',
+  status: slot.is_booked
+   ? 'Pending'
+  : (slot.student_id === null ? 'Cancelled' : 'Completed'),
+  id: item.id
+}));
     filterByDate(filterDateInput.value);
   } catch (err) {
     errorMsg.textContent = 'Error fetching schedule: ' + err.message;
@@ -210,18 +211,6 @@ function hideSpinner() {
 }
 
 showSpinner();
-// // Example usage: fetch data and then hide spinner
-// fetch('/api/some-endpoint')
-//   .then(response => response.json())
-//   .then(data => {
-//     // handle data if needed
-//   })
-//   .catch(error => {
-//     // handle error if needed
-//   })
-//   .finally(() => {
-//     hideSpinner();
-//   });
 
   async function fetchCurrentStaff() {
   const token = localStorage.getItem('jwt');
