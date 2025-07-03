@@ -13,9 +13,19 @@
     .clinic-card:hover { box-shadow: 0 4px 24px 0 rgba(37,99,235,0.10); }
   </style>
 </head>
-<body class="bg-gray-50 min-h-screen flex flex-col md:flex-row font-sans">
+<body class="bg-gray-50 min-h-screen flex flex-col md:flex-row font-sans relative">
+  <!-- Hamburger Button (Mobile Only) -->
+  <button id="sidebarToggle" class="fixed top-4 left-4 z-50 md:hidden bg-blue-800 text-white p-2 rounded shadow-lg focus:outline-none" aria-label="Open sidebar">
+    <svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
+    </svg>
+  </button>
+  <!-- Sidebar Overlay (Mobile Only) -->
+  <div id="sidebarOverlay" class="fixed inset-0 bg-black bg-opacity-40 z-40 hidden md:hidden"></div>
   <!-- Sidebar -->
-  <aside class="bg-blue-800 text-white w-full md:w-72 p-6 flex flex-col space-y-8 md:min-h-screen shadow-lg">
+  <aside id="sidebar" class="bg-blue-800 text-white w-72 max-w-full p-6 flex flex-col space-y-8 md:min-h-screen shadow-lg
+    fixed inset-y-0 left-0 z-50 transform -translate-x-full transition-transform duration-300 md:relative md:translate-x-0 md:flex md:w-72 md:static md:shadow-lg"
+    aria-label="Sidebar">
     <div class="flex items-center space-x-3">
       <img src="https://img.icons8.com/ios-filled/50/ffffff/hospital-room.png" alt="Clinic Logo" class="w-10 h-10"/>
       <span class="text-2xl font-extrabold tracking-wide">Clinic Slot Scheduler</span>
@@ -34,10 +44,15 @@
     <div class="mt-auto text-xs text-blue-200 opacity-70">
       &copy; 2025 Clinic Slot Scheduler
     </div>
+    <!-- Close button (Mobile Only) -->
+    <button id="sidebarClose" class="absolute top-4 right-4 md:hidden text-white bg-blue-700 rounded-full p-1 focus:outline-none" aria-label="Close sidebar">
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+      </svg>
+    </button>
   </aside>
-
   <!-- Main Content -->
-  <main class="flex-1 p-4 md:p-8">
+  <main class="flex-1 p-4 md:p-8 md:ml-0">
     <!-- Header -->
     <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-8 gap-4">
       <div>
@@ -84,5 +99,34 @@
       <div class="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
     </div>
   </main>
+  <!-- ...existing code... -->
+  <script>
+    // Sidebar toggle logic for mobile
+    const sidebar = document.getElementById('sidebar');
+    const sidebarToggle = document.getElementById('sidebarToggle');
+    const sidebarOverlay = document.getElementById('sidebarOverlay');
+    const sidebarClose = document.getElementById('sidebarClose');
+
+    function openSidebar() {
+      sidebar.classList.remove('-translate-x-full');
+      sidebarOverlay.classList.remove('hidden');
+      document.body.classList.add('overflow-hidden');
+    }
+    function closeSidebar() {
+      sidebar.classList.add('-translate-x-full');
+      sidebarOverlay.classList.add('hidden');
+      document.body.classList.remove('overflow-hidden');
+    }
+    sidebarToggle?.addEventListener('click', openSidebar);
+    sidebarOverlay?.addEventListener('click', closeSidebar);
+    sidebarClose?.addEventListener('click', closeSidebar);
+
+    // Close sidebar on resize to md and up
+    window.addEventListener('resize', () => {
+      if (window.innerWidth >= 768) {
+        closeSidebar();
+      }
+    });
+  </script>
 </body>
 </html>
