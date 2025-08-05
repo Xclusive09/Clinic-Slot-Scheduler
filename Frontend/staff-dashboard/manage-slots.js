@@ -62,7 +62,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     goToPage(1);
   }
-
 async function fetchSlots() {
   showSpinner();
   errorMsg.textContent = '';
@@ -73,11 +72,16 @@ async function fetchSlots() {
     if (!res.ok) throw new Error('Failed to fetch slots');
     const slots = await res.json();
 
-    allSlots = slots.map(slot => ({
+    // Only include slots assigned to a student
+    const assignedSlots = slots.filter(slot => slot.student_id !== null);
+
+    allSlots = assignedSlots.map(slot => ({
       studentId: slot.student_id || '',
       name: slot.Student ? slot.Student.name : '',
       slot: slot.slot_date && slot.slot_time ? `${slot.slot_date}T${slot.slot_time}` : '',
-      status: slot.is_booked ? 'Completed' : 'Pending',
+      status: slot.student_id === null
+      ? 'Cancelled'
+      : (slot.is_booked ? 'Completed' : 'Pending'),
       id: slot.id
     }));
 

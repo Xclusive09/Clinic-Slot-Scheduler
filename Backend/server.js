@@ -5,11 +5,16 @@ import morgan from 'morgan';
 import dotenv from 'dotenv';
 dotenv.config();
 import slotRoutes from './routes/slot.js';
-
-
-import { authenticate } from './middleware/auth.js';
-import { exportToCSV } from './controllers/bookingController.js';
 import { Router } from 'express';
+import staffRoutes from './routes/staff.js';
+import studentRoutes from './routes/student.js';
+import bcrypt from 'bcrypt';
+import {Staff} from './models/staff.js';
+import scheduleRoutes from './routes/schedule.js';
+import { sequelize } from './config/database.js';
+
+const PORT = process.env.PORT || 3000;
+const exportRouter = Router();
 
 
 const app = express();
@@ -23,12 +28,9 @@ app.use(urlencoded({ extended: true }));
 app.use('/api/slots', slotRoutes);
 
 // Routes
-import staffRoutes from './routes/staff.js';
 app.use('/api/staff', staffRoutes);
-
-
-import studentRoutes from './routes/student.js';
 app.use('/api', studentRoutes);
+app.use('/api/schedule', scheduleRoutes);
 
 // Error handling middleware
 app.use((err, _req, res, _next) => {
@@ -36,23 +38,11 @@ app.use((err, _req, res, _next) => {
   res.status(500).json({ error: 'Something went wrong!' });
 });
 
-import scheduleRoutes from './routes/schedule.js';
-app.use('/api/schedule', scheduleRoutes);
-
-
-
-// Database connection and server start
-import { sequelize } from './config/database.js';
-const PORT = process.env.PORT || 3000;
-const exportRouter = Router();
-
-// exportRouter.get('/export', authenticate, exportToCSV);
-// app.use('/api', exportRouter);
 
 sequelize.authenticate()
   .then(() => {
     console.log('Database connected');
-    return sequelize.sync(); // Use { force: true } only for development to reset DB
+    return sequelize.sync();
   })
   .then(() => {
     app.listen(PORT, () => {
@@ -63,8 +53,6 @@ sequelize.authenticate()
     console.error('Unable to connect to the database:', err);
   });
 
-  import bcrypt from 'bcrypt';
-import {Staff} from './models/staff.js';
 
 
 // Temporary endpoint to reset staff password

@@ -1,7 +1,6 @@
 import { Student } from '../models/student.js';
 import { Slot } from '../models/slot.js';
-import { autoAssignSlots } from '../services/slotAssignment.js';
-
+import { autoAssignSlotForStudent } from '../services/slotAssignment.js';
 export const getStudentSlot = async (req, res) => {
   try {
     // You can get student_id from req.user if authenticated, or from query/body
@@ -37,7 +36,7 @@ export const paymentWebhook = async (req, res) => {
             payment_timestamp: new Date()
         });
 
-        await autoAssignSlots();
+        await autoAssignSlotForStudent();
 
         res.json({ message: 'Payment confirmed' });
     } catch (error) {
